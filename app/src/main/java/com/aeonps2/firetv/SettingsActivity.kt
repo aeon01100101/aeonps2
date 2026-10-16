@@ -53,6 +53,12 @@ class SettingsActivity : Activity() {
             0xFFDDDDDD.toInt())
         addLine(root, getString(R.string.ram_fmt, ExplorerLogic.formatSize(totalRam())),
             0xFFDDDDDD.toInt())
+        // Which engine this TV will actually run, and why (plain words).
+        if (Engines.currentEngineCode() == Engines.PCEE2) {
+            addLine(root, getString(R.string.engine_main_line), 0xFF9BE08A.toInt())
+        } else {
+            addLine(root, getString(R.string.engine_fallback_line), 0xFFFFD97A.toInt())
+        }
         addLine(root, getString(R.string.tv_note), 0xFFBBBBBB.toInt())
 
         // ---- Games + serials ----

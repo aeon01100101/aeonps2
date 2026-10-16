@@ -219,3 +219,94 @@ chmod 600). Cert SHA-256:
   unproven. Labelled "coming" in-app, never claimed working.
 - Slim profile values beyond the 4 listed: unverified against the
   core's behavior without a BIOS; Slim is labelled EXPERIMENTAL in-app.
+
+## v1.0.2 — install fix (Oct 16, 2026)
+
+Reason: v1.0.1 "won't install" on Isaiah's Fire TV. Diagnosis: the APK
+was **arm64-v8a only**, and his stick — like many "64-bit CPU" Fire TV
+sticks (Amazon lists the 2023 2 GB sticks as ABI 32-bit) — appears to
+run a 32-bit Fire OS userland, which refuses an APK with no matching
+ABI (`INSTALL_FAILED_NO_MATCHING_ABIS`). v1.0.2 ships both ABIs and
+auto-selects the engine the OS can actually run.
+
+### What changed
+
+- **Universal ABI packaging.** The bridge (`libaeonps2_bridge.so`)
+  compiles for arm64-v8a AND armeabi-v7a via ndkBuild. `jniLibs/`
+  ships per ABI: arm64-v8a → PCEE2 (`libpcee2_libretro_android.so`,
+  hash re-verified `880c4daa…80`, unchanged); armeabi-v7a →
+  Play! (`libplay_libretro_android.so`, ELF32, sha256
+  `14b7c52d…95c` re-verified against the bench pull). `aapt` reports
+  `native-code: 'arm64-v8a' 'armeabi-v7a'`.
+- **Engine auto-selection by runtime ABI** (`Engines.kt`, truth table
+  mirrored in the bridge as `aeonps2_select_engine_code()`):
+  arm64-v8a on `Build.SUPPORTED_ABIS` → PCEE2; anything else →
+  Play!. 7/7 new unit checks pass on the truth table (29/29 total).
+- **Play! fallback is honest everywhere.** Home subtitle, Settings →
+  "This TV" card, and BIOS screen all name the running engine:
+  64-bit → "Engine: PCEE2 — the PCSX2 engine, the main engine";
+  32-bit → "Engine: Play! — the 32-bit fallback engine… Expect lower
+  compatibility and speed than the main engine." [Test BIOS] is
+  disabled on the Play! path (button hidden, plain-language note;
+  the owed auto-test flag is cleared quietly) because Play! segfaults
+  on no-content boot — bench-proven. The bridge additionally REFUSES
+  `nativeLoadGame(NULL)` when the loaded core is Play! (returns
+  graceful failure, never calls the core) — proven by the Play! smoke
+  test: `load_game(NULL)` returned 1 (refused), exit 0. BIOS import is
+  still collected; on the Play! path a missing BIOS no longer blocks
+  game launch (Play! boots some games without one — stated in-app).
+- **`extractNativeLibs` via legacy packaging**
+  (`packaging.jniLibs.useLegacyPackaging = true`; merged manifest
+  carries `android:extractNativeLibs="true"`, verified in the APK's
+  xmltree as `0xffffffff`). .so files are Deflated in the APK now
+  (v1.0.1 stored them) — hence the smaller 16,712,797-byte file; CRCs
+  and contents unchanged.
+- **v1 + v2 signing enabled** (`v1SigningEnabled = true`,
+  `v2SigningEnabled = true`), same permanent keystore/cert
+  (`46ddbd2e…`; apksigner cert digest byte-identical to v1.0.1).
+  Verification note (bench finding, Oct 16): plain `apksigner verify`
+  reports "v1 scheme: false" on ANY APK with minSdk ≥ 24 — including
+  one signed by apksigner itself — because apksigner skips v1 when
+  the platform doesn't need it. With `--min-sdk-version 21` the same
+  APK verifies **v1: true AND v2: true**; `jarsigner -verify` also
+  passes. The v1 signature is real and valid; the "false" is an
+  apksigner reporting quirk, proven by experiment, not assumed.
+- Log session header now records the engine
+  (`aeon: engine=PCEE2 (the PCSX2 engine)`), visible in [Emulator log].
+
+### Bench evidence (v1.0.2)
+
+- Host unit tests: **29/29 PASS** (was 22/22; +7 engine-selection
+  checks incl. empty/NULL ABI list → safe Play! fallback).
+- Bridge Linux compile (`-DAEONPS2_BENCH`): clean (warnings only,
+  pre-existing).
+- PCEE2 spike re-run against the Linux core: dlopen OK, no-content
+  boot TRUE, 30 frames, clean deinit, exit 0 — no regression from the
+  bridge changes.
+- Play! Linux smoke (`play_smoke`, own process, timeout 120):
+  `aeonps2_load_game("/tmp/does-not-exist-102.iso")` returned 0
+  (core defers failure, matching CORES.md — the known abort lands on
+  first `retro_run`, contained by the :emu process design);
+  `aeonps2_load_game(NULL)` returned 1 = **refused before the core**,
+  exit 0. The SIGSEGV path the bench proved is now unreachable.
+- APK receipts: `aapt` → `com.aeonps2.firetv` vc3/1.0.2, leanback +
+  leanback-launchable, minSdk 24, `native-code: 'arm64-v8a'
+  'armeabi-v7a'`; `unzip -l` → both ABI lib dirs with lib-prefixed
+  .so files (arm64 bridge 25,824 B + PCEE2 29,336,400 B;
+  v7a bridge 18,268 B + Play! 2,615,040 B); manifest xmltree →
+  `:emu` intact, `extractNativeLibs=0xffffffff`; `apksigner verify -v
+  --min-sdk-version 21` → v1 true, v2 true, cert SHA-256
+  `46ddbd2e…` identical to v1.0.0/v1.0.1; `zipalign -c 4` OK.
+- Final APK: `~/workspace/aeonps2/output/AeonPS2-v1.0.2.apk`,
+  16,712,797 bytes,
+  sha256 `dd99d2ee59bb71295c9349b83ae994119cc935dba634c74e2bb58e4bd3999f07`.
+
+### What is still NOT proven (stated plainly)
+
+- Real BIOS boot with video / real FFX-KH game boots: still blocked
+  on a real PS2 BIOS + disc images (unchanged from v1.0.x).
+- The Play! engine on a real 32-bit Fire OS: no 32-bit device exists
+  in this sandbox — the fallback path is bench-proven at the bridge
+  level (load/guard/isolation) but NOT device-tested. Isaiah's TV
+  decides which path gets exercised first.
+- On-device performance (either engine): the TV is the victory lap.

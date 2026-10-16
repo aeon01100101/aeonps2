@@ -145,6 +145,9 @@ class EmulatorActivity : Activity() {
     private var audioThread: Thread? = null
     private var audioTrack: AudioTrack? = null
 
+    /** PCEE2 (64-bit, main) or Play! (32-bit-only TV, fallback). */
+    private var engine = Engines.PCEE2
+
     private var originalPath = ""
     private var resolvedPath = ""
 
@@ -252,8 +255,11 @@ class EmulatorActivity : Activity() {
     // ---------- startup & validation (no native calls until the end) ----------
 
     private fun begin() {
-        // The core cannot boot anything without a real PS2 BIOS.
-        if (!SystemSetup.hasBios(filesDir)) {
+        engine = Engines.currentEngineCode()
+        // The Play! fallback engine can boot games with its own built-in
+        // handling, so a missing BIOS is not a hard stop there — the
+        // main PCEE2 engine cannot boot anything without a real PS2 BIOS.
+        if (engine == Engines.PCEE2 && !SystemSetup.hasBios(filesDir)) {
             noBiosDialog()
             return
         }
@@ -344,6 +350,25 @@ class EmulatorActivity : Activity() {
      * game crash; the shell boots with nativeLoadGame(null).
      */
     private fun beginBiosTest() {
+        engine = Engines.currentEngineCode()
+        if (!Engines.supportsBiosTest(engine)) {
+            // The Play! fallback engine cannot boot without content
+            // (its no-content path crashes the core) — the button for
+            // this is hidden on 32-bit TVs, so this is only a guard.
+            runOnUiThread {
+                try {
+                    AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.bios_title))
+                        .setMessage(getString(R.string.test_bios_unavailable))
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                } catch (e: Exception) {
+                    // Ignore.
+                }
+            }
+            finish()
+            return
+        }
         if (!SystemSetup.hasBios(filesDir)) {
             noBiosDialog()
             return
@@ -440,6 +465,11 @@ class EmulatorActivity : Activity() {
             }
             val game = if (biosTest) "(bios boot)" else originalPath
             logFile.appendText("aeon: session $ts\n${EmuLog.PREFIX_GAME_PATH}$game\n")
+            try {
+                logFile.appendText("aeon: engine=${Engines.displayName(engine)}\n")
+            } catch (e: Exception) {
+                // Ignore.
+            }
         } catch (e: Exception) {
             // Best effort; the bridge's own lines still land.
         }
@@ -502,13 +532,14 @@ class EmulatorActivity : Activity() {
             val saveDir = SystemSetup.savesDir(filesDir)
 
             // BIOS re-check inside :emu (the UI check could race a removal).
-            if (!SystemSetup.hasBios(filesDir)) {
+            // The Play! fallback engine works without an imported BIOS.
+            if (engine == Engines.PCEE2 && !SystemSetup.hasBios(filesDir)) {
                 noBiosDialog()
                 return@Thread
             }
 
             val corePath =
-                File(applicationInfo.nativeLibraryDir, "libpcee2_libretro_android.so")
+                File(applicationInfo.nativeLibraryDir, Engines.coreLibName(engine))
                     .absolutePath
             if (!File(corePath).isFile) {
                 failDialog(getString(R.string.fail_core_missing))

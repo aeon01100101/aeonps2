@@ -32,6 +32,7 @@ class BiosActivity : Activity() {
     private lateinit var statusView: TextView
     private lateinit var removeBtn: Button
     private lateinit var testBtn: Button
+    private lateinit var fallbackNoteView: TextView
 
     /** True while a BIOS test is running in the :emu process. */
     private var biosTestPending = false
@@ -112,6 +113,18 @@ class BiosActivity : Activity() {
             )
         )
 
+        // Plain words on 32-bit TVs: the Play! fallback engine has no
+        // no-content boot, so [Test BIOS] can't exist there. The button
+        // is replaced by this note.
+        fallbackNoteView = TextView(this).apply {
+            text = getString(R.string.test_bios_unavailable)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setTextColor(0xFFFFD97A.toInt())
+            setPadding(0, dp(8), 0, dp(16))
+            visibility = View.GONE
+        }
+        root.addView(fallbackNoteView)
+
         setContentView(root)
         refresh()
         maybeAutoTest()
@@ -163,8 +176,23 @@ class BiosActivity : Activity() {
         maybeAutoTest()
     }
 
+    /** True on 32-bit-only TVs, where the Play! fallback engine runs and
+     * [Test BIOS] cannot work (Play! crashes on no-content boot). */
+    private fun isFallbackEngine(): Boolean =
+        Engines.currentEngineCode() == Engines.PLAY
+
     /** Fires the one automatic Test BIOS owed by a fresh import. */
     private fun maybeAutoTest() {
+        if (isFallbackEngine()) {
+            // Play! cannot boot without a game: the test would crash the
+            // core. Clear the owed flag quietly instead of starting it.
+            try {
+                Store.setAutoTestPending(this, false)
+            } catch (e: Exception) {
+                // Ignore.
+            }
+            return
+        }
         val pending = try {
             Store.autoTestPending(this)
         } catch (e: Exception) {
@@ -242,7 +270,15 @@ class BiosActivity : Activity() {
                 )
             }
             removeBtn.visibility = View.VISIBLE
-            testBtn.visibility = View.VISIBLE
+            if (isFallbackEngine()) {
+                // Play! cannot boot with no content: hide the button the
+                // engine can't honor and say why instead.
+                testBtn.visibility = View.GONE
+                fallbackNoteView.visibility = View.VISIBLE
+            } else {
+                testBtn.visibility = View.VISIBLE
+                fallbackNoteView.visibility = View.GONE
+            }
         } else {
             try {
                 Store.setBiosImported(this, false)
@@ -253,6 +289,7 @@ class BiosActivity : Activity() {
             statusView.text = ""
             removeBtn.visibility = View.GONE
             testBtn.visibility = View.GONE
+            fallbackNoteView.visibility = View.GONE
         }
     }
 

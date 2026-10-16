@@ -60,6 +60,20 @@ class MainActivity : FragmentActivity() {
             setTextColor(0xFFFFFFFF.toInt())
         })
 
+        // Which engine this TV will run (PCEE2 on 64-bit, Play! fallback
+        // on 32-bit-only). Plain words; also in Settings -> This TV.
+        root.addView(TextView(this).apply {
+            val engine = Engines.currentEngineCode()
+            text = if (engine == Engines.PCEE2) {
+                getString(R.string.engine_main_line)
+            } else {
+                getString(R.string.engine_fallback_line)
+            }
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setTextColor(if (engine == Engines.PCEE2) 0xFF9BE08A.toInt() else 0xFFFFD97A.toInt())
+            setPadding(0, 0, 0, dp(8))
+        })
+
         // Big Fat / Slim picker cards: remote-focusable, 1st-grader simple.
         val modes = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL

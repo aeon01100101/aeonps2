@@ -65,6 +65,12 @@ static void *core_handle = NULL;
 static char g_system_dir[1024] = {0};
 static char g_save_dir[1024] = {0};
 
+/* True when the loaded core is Play! (32-bit fallback engine). The
+ * no-content boot path (Test BIOS) is disabled for Play!: the bench
+ * proved it segfaults on retro_load_game(NULL), so the bridge refuses
+ * NULL content gracefully instead of calling the core. */
+static bool g_core_is_play = false;
+
 static void     (*core_retro_init)(void);
 static void     (*core_retro_deinit)(void);
 static unsigned (*core_retro_api_version)(void);
@@ -298,6 +304,37 @@ static void opt_parse_definitions(const struct retro_core_option_v2_definition *
     }
     ringf("options audit complete: %d definitions (%s)", g_nopts, origin);
     opt_apply_stack();
+}
+
+/* ------------------------------------------------------------------ */
+/* Engine selection (pure function — same truth table as Kotlin        */
+/* Engines.kt; exercised by the host unit tests).                      */
+/*                                                                     */
+/* Which engine this process can run is decided by the OS ABIs it       */
+/* actually supports: if arm64-v8a is on the list the process can load  */
+/* the PCEE2 core (main engine). Otherwise the process is 32-bit and   */
+/* must use Play! (fallback engine). Returns 0 = PCEE2, 1 = Play!.     */
+/* ------------------------------------------------------------------ */
+enum { AEON_ENGINE_PCEE2 = 0, AEON_ENGINE_PLAY = 1 };
+
+__attribute__((unused))
+static int aeonps2_select_engine_code(const char *abis_csv) {
+    if (!abis_csv) return AEON_ENGINE_PLAY;
+    const char *p = abis_csv;
+    char tok[32];
+    while (*p) {
+        while (*p == ' ' || *p == ',') p++;
+        size_t n = 0;
+        while (*p && *p != ',' && n + 1 < sizeof(tok)) {
+            tok[n++] = *p++;
+        }
+        /* Trim trailing whitespace so "arm64-v8a " still matches. */
+        while (n > 0 && (tok[n - 1] == ' ' || tok[n - 1] == '\t')) n--;
+        tok[n] = '\0';
+        while (*p && *p != ',') p++;
+        if (n > 0 && !strcmp(tok, "arm64-v8a")) return AEON_ENGINE_PCEE2;
+    }
+    return AEON_ENGINE_PLAY;
 }
 
 /* ------------------------------------------------------------------ */
@@ -735,6 +772,17 @@ static bool aeonps2_init(const char *core_path, const char *system_dir,
     ring_add("PHASE CORE_READY");
     audio_ring_init(48000);
     g_inited = true;
+
+    /* Engine identity: Play! reports corename "Play!"; also match the
+     * file name as a second signal (covers renames). */
+    {
+        const char *name = si.library_name ? si.library_name : "";
+        g_core_is_play = (strstr(name, "Play") != NULL) ||
+                         (strstr(core_path, "play_libretro") != NULL);
+        ringf("engine: %s (Play! fallback = %s)",
+              name[0] ? name : "(unknown)",
+              g_core_is_play ? "yes" : "no");
+    }
     return true;
 }
 
@@ -745,6 +793,13 @@ static int aeonps2_load_game(const char *path) {
     if (path) ringf("loading content: %s (serial=%s mode=%s)",
                     path, g_serial[0] ? g_serial : "(unknown)", g_mode);
     else ringf("no-content boot (Test BIOS), mode=%s", g_mode);
+    if (!path && g_core_is_play) {
+        /* Play! cannot boot without content (bench: SIGSEGV on
+         * retro_load_game(NULL)). Refuse gracefully — the Kotlin
+         * side never calls this path, so this is a last-resort guard. */
+        ring_add("refused: Play! fallback engine cannot boot without content");
+        return 1;
+    }
     opt_apply_stack(); /* late overrides take effect for this boot */
     struct retro_game_info gi;
     const struct retro_game_info *gip = NULL;

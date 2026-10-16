@@ -123,6 +123,9 @@
     <string name="abis_fmt">Can run: %1$s</string>
     <string name="ram_fmt">Memory: %1$s total</string>
     <string name="tv_note">PS2 games are heavy. Light games run best on a TV stick.</string>
+    <string name="engine_main_line">Engine: PCEE2 — the PCSX2 engine, the main engine. This TV can run it.</string>
+    <string name="engine_fallback_line">Engine: Play! — the 32-bit fallback engine. This TV can\'t run the main PCSX2 engine, so Play! does the job instead. Expect lower compatibility and speed than the main engine.</string>
+    <string name="test_bios_unavailable">No [Test BIOS] here: this TV runs the Play! fallback engine, which can only boot with a game loaded — a no-game boot would crash it. Just launch your game instead; the library and BIOS import work the same.</string>
     <string name="games_section">Your games</string>
     <string name="game_serial_fmt">%1$s\nSerial: %2$s · %3$s</string>
     <string name="serial_unknown">not found</string>
