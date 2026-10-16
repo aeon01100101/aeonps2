@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+**/build/
+# Android
+local.properties
+*.apk
+*.ap_
+*.aab
+# Signing — permanent keystore lives OUTSIDE this repo in ../signing/
+*.keystore
+*.jks
+keystore.properties
+# C++/NDK intermediates (build-tree artifacts already excluded above; the
+# PCEE2 core in app/src/main/jniLibs/ IS committed intentionally)
+.cxx/
+# IDE
+.idea/
+*.iml
+.DS_Store
+# Bench intermediate outputs (results kept separately in ../bench/)

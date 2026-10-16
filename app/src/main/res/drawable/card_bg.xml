@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Game card background: dark tile, cyan ring when focused (D-pad). -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#1B3A4A" />
+            <stroke
+                android:width="3dp"
+                android:color="#35C4DC" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#1A2433" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+
+</selector>

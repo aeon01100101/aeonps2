@@ -1,0 +1,13 @@
+// Top-level build file — legacy buildscript pattern (sandbox-safe:
+// plugins{} block 303-redirects to a 404 in this sandbox).
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.5.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24")
+    }
+}
+

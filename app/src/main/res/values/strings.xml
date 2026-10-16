@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AeonPS2</string>
+    <string name="add_games">Add games</string>
+    <string name="bios">BIOS</string>
+    <string name="bios_title">BIOS</string>
+    <string name="settings">Settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="emulator_log">Emulator log</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="loading">Loading…</string>
+    <string name="unknown">unknown</string>
+
+    <!-- Main: Fat/Slim picker cards -->
+    <string name="mode_fat">🐘 Big PS2 (Fat)\nThe original — best tested</string>
+    <string name="mode_fat_picked">🐘 Big PS2 (Fat)\nThe original — best tested ✓ your pick</string>
+    <string name="mode_slim">📀 Small PS2 (Slim)\nExperimental — still being proven</string>
+    <string name="mode_slim_picked">📀 Small PS2 (Slim)\nExperimental — still being proven ✓ your pick</string>
+    <string name="mode_name_fat">Big PS2 (Fat)</string>
+    <string name="mode_name_slim">Small PS2 (Slim)</string>
+
+    <!-- Main -->
+    <string name="no_games_hint">No games yet — press Add games</string>
+    <string name="unexpected_shutdown_title">Unexpected shutdown</string>
+    <string name="crash_msg">AeonPS2 closed while playing %1$s.</string>
+    <string name="crash_explainer">The box below is what the emulator was doing when it stopped. If a game keeps failing, these lines say why.</string>
+    <string name="last_words_label">The emulator\'s last words:</string>
+    <string name="check_bios">Check my BIOS file</string>
+
+    <!-- Crash forensics: plain words for the last phase marker -->
+    <string name="phase_init">It died while starting the engine.</string>
+    <string name="phase_core_ready">The engine started, but it died before reading the game.</string>
+    <string name="phase_load_begin">It died while reading the game.</string>
+    <string name="phase_first_frame">It died right after the first picture.</string>
+    <string name="phase_running">It died during play.</string>
+
+    <!-- Importer -->
+    <string name="pick_game_title">Add games</string>
+    <string name="pick_game_explain">Pick a game file on your TV. AeonPS2 copies it into its own folder, so it stays put even if the original moves.</string>
+    <string name="bios_pick_title">Pick a BIOS file</string>
+    <string name="bios_pick_explain">Pick your PlayStation 2 BIOS file (usually a .bin file, 4 MB). It gets copied into AeonPS2\'s BIOS folder.</string>
+    <string name="pick_file">Pick a file</string>
+    <string name="copying">Copying…</string>
+    <string name="copying_fmt">Copying… %1$s of %2$s</string>
+    <string name="copying_unknown_fmt">Copying… %1$s so far</string>
+    <string name="copy_failed">Could not copy that file</string>
+    <string name="added_to_library">Added to your library</string>
+
+    <!-- BIOS -->
+    <string name="no_bios_banner">No BIOS yet — import your own PS2 BIOS to play</string>
+    <string name="bios_list_fmt">%1$s (%2$s)</string>
+    <string name="import_bios">Import BIOS file</string>
+    <string name="remove_bios">Remove BIOS files</string>
+    <string name="remove_bios_confirm">Remove all BIOS files? Games won\'t start without one.</string>
+    <string name="bios_saved">BIOS saved</string>
+    <string name="bios_removed">BIOS removed</string>
+    <string name="bios_copy_failed">Could not copy the BIOS file</string>
+    <string name="bios_ready">BIOS ready: %1$s</string>
+    <string name="invalid_bios_title">Not a PS2 BIOS</string>
+    <string name="invalid_bios_msg">That file is not 4 MB — a real PlayStation 2 BIOS is exactly 4,194,304 bytes.</string>
+    <string name="bios_warn_title">This BIOS may not work</string>
+    <string name="bios_suspicious_msg">This file is the right size for a BIOS (4 MB) but doesn\'t look like a Sony BIOS — games may crash with it.</string>
+    <string name="bios_invalid_msg">This file is the right size for a BIOS but doesn\'t look like a PlayStation 2 BIOS at all — games will probably crash with it.</string>
+    <string name="use_it_anyway">Use it anyway</string>
+    <string name="pick_another">Pick another</string>
+    <string name="test_bios">Test BIOS</string>
+    <string name="bios_test_ok">BIOS works — the PlayStation 2 shell started.</string>
+    <string name="bios_test_failed">BIOS didn\'t start — games won\'t either.</string>
+    <string name="bios_test_rejected">The emulator rejected this BIOS file (it isn\'t a working PS2 BIOS). Try a different dump of your own console.</string>
+
+    <!-- Emulator -->
+    <string name="no_bios_title">No BIOS yet</string>
+    <string name="no_bios_msg">AeonPS2 needs your own PlayStation 2 BIOS to start anything. Import it on the BIOS screen first.</string>
+    <string name="open_bios_screen">Open BIOS screen</string>
+    <string name="crashed_before_title">Game closed unexpectedly</string>
+    <string name="crashed_before_msg">AeonPS2 closed while playing %1$s last time.</string>
+    <string name="try_again">Try again</string>
+    <string name="back_to_library">Back to library</string>
+    <string name="fail_unreadable">Could not read the file.</string>
+    <string name="fail_too_small">That file is too small to be a PS2 game.</string>
+    <string name="fail_missing_data">The disc is missing its data file: %1$s</string>
+    <string name="fail_core_start">Could not start the emulator core.</string>
+    <string name="fail_core_missing">The emulator engine file is missing — reinstall AeonPS2.</string>
+    <string name="fail_game_load">The game would not load.</string>
+    <string name="fail_bios_copy">Could not save the BIOS file.</string>
+    <string name="fail_title">Could not start game</string>
+    <string name="fail_file">File</string>
+    <string name="fail_path">Path</string>
+    <string name="fail_size">Size</string>
+    <string name="core_log">core log</string>
+    <string name="log_unavailable">(log unavailable)</string>
+    <string name="bios_not_game_title">That\'s a BIOS file</string>
+    <string name="bios_not_game_msg">That file is a PlayStation 2 BIOS, not a game.</string>
+    <string name="use_as_bios">Use as BIOS</string>
+    <string name="paused_title">Paused</string>
+    <string name="pause_start_help">Quick-press START in a game: the game\'s own button — that\'s how Kingdom Hearts pauses and Final Fantasy X opens menus. Hold START (about half a second), or press Back: this menu instead.</string>
+    <string name="resume">Resume</string>
+    <string name="save_state">Save state</string>
+    <string name="load_state">Load state</string>
+    <string name="switch_to_slim">Switch to Small PS2 (Slim)</string>
+    <string name="switch_to_fat">Switch to Big PS2 (Fat)</string>
+    <string name="quit_to_library">Quit to library</string>
+    <string name="save_state_title">Save state?</string>
+    <string name="save_state_warn">A save state is a big file (%1$s). Save it anyway?</string>
+    <string name="about_96mb">about 96 MB</string>
+    <string name="state_saved">State saved</string>
+    <string name="state_save_failed">Could not save state</string>
+    <string name="state_loaded">State loaded</string>
+    <string name="state_load_failed">Could not load state</string>
+    <string name="no_state_yet">No saved state yet</string>
+
+    <!-- Settings -->
+    <string name="buttons_section">Buttons</string>
+    <string name="buttons_desc">In a game, a quick press of START goes to the game itself — it\'s the game\'s own button, and Kingdom Hearts pauses with it. To open the AeonPS2 menu instead, hold START for about half a second, or press Back. Both analog sticks work in games that use them.</string>
+    <string name="fat_section">Big PS2 (Fat) — the original</string>
+    <string name="fat_desc">Core defaults — the tested path. This is how the engine is built to run, and it\'s the mode every fix was proven in.</string>
+    <string name="hdd_row">💾 Virtual hard drive — coming in a later version, not in v1.0</string>
+    <string name="slim_section">Small PS2 (Slim) — EXPERIMENTAL</string>
+    <string name="slim_desc">Slim is still being proven — Fat is the tested path. Pick Slim only if you want to help test it.</string>
+    <string name="this_tv">This TV</string>
+    <string name="abis_fmt">Can run: %1$s</string>
+    <string name="ram_fmt">Memory: %1$s total</string>
+    <string name="tv_note">PS2 games are heavy. Light games run best on a TV stick.</string>
+    <string name="games_section">Your games</string>
+    <string name="game_serial_fmt">%1$s\nSerial: %2$s · %3$s</string>
+    <string name="serial_unknown">not found</string>
+    <string name="about_no_content">No games or BIOS included.</string>
+
+    <!-- Emulator log viewer -->
+    <string name="emu_log_no_log">No emulator log yet — play a game first.</string>
+    <string name="emu_log_game_fmt">Game: %1$s</string>
+    <string name="emu_log_serial_fmt">Serial: %1$s</string>
+
+    <!-- Sizes -->
+    <string name="bytes_fmt">%1$d bytes</string>
+
+</resources>
